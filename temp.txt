@@ -1,0 +1,6 @@
+You need to first install forever separately for auto reloading.
+Process exit helps in restarting the server but only if forever is used.
+YOu can tryu nodemon but it wont analyse the change in text file .
+So auto reloading is not possible with that.
+If application is started with node index then process.exit() has to be removed.
+Since it exits the process.
