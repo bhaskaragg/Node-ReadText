@@ -39,7 +39,7 @@ app.use((req, res, next) => {
         // location.reload();
         // //process.exit(1);
         // process.reload();
-        console.log('aaa');
+        console.log('File changed');
         //res.end('<html><body>' + d + '</body></html>');
     });
 
