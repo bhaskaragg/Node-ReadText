@@ -1,62 +1,88 @@
-const express = require('express');
-const cors = require('cors');
-var http = require('http');
-var fs = require('fs');
-var cp = require('child_process');
-const hostname = 'localhost';
-var port = 3000;
-//var server = http.createServer((req, res) => {
-const app = express();
-app.use(cors());
-app.use((req, res, next) => {
-    fs.readFile("temp.txt", function (err, data) {
-        var arr = [""];
-        var k = 0;
-        if (data) {
-            for (var i = 0; i < data.length; i++) {
-                if (data[i] == 10) {
-                    k++;
-                    arr[k] = "";
-                } else if (data[i] !== 13) {
-                    arr[k] = arr[k] + String.fromCharCode(data[i]);
-                }
-            }
-            var d = "";
-            if (k - 9 >= 0) {
-                for (i = k-9; i<=k; i++) {
-                    d = d + arr[i].toString() + '\n';
-                }
-            } else {
-                for (i = 0; i<=k; i++) {
-                    d = d + arr[i].toString() + '\n';
-                }
-            }
-            res.setHeader('Content-Type', 'text/plaintext');
-            res.end(d);
+<!DOCTYPE html>
+<html>
+
+<head>
+    <style>
+
+
+        table {
+            border-collapse: separate;
+            border-spacing: 1px;
+            background: #CCC;
+            margin-right: 200px
         }
-    });
-    fs.watch('temp.txt', () => {
-        // location.reload();
-        // //process.exit(1);
-        // process.reload();
-        console.log('aaa');
-        //res.end('<html><body>' + d + '</body></html>');
-    });
 
-});
+        table th {
+            background: #EEE;
+            font-weight: 600;
+            padding: 10px 20px;
+            text-align: center;
+        }
 
-const server = http.createServer(app);
-const io = require('socket.io')(server);
-io.on('connection', function (client) {
-    console.log("Socket connection is ON!");
-});
+        table tbody {
+            padding: 0;
+            margin: 0;
+            border-collapse: collapse;
+            border-spacing: 0px;
+        }
 
-server.listen(port, hostname, () => {
-    console.log(`Server running at http://${hostname}:${port}/`);
-});
-fs.watchFile('temp.txt', function (curr, prev) {
-    // file changed push this info to client.
-    console.log("file Changed");
-    io.emit('fileChanged', 'File has been changed.');
-});
+        table td {
+            background: #C7DBED;
+            padding: 5px 30px;
+            text-align: left;
+            font-size: 20px;
+        }
+    </style>
+    <script type="text/javascript" src="node_modules/socket.io-client/dist/socket.io.js"></script>
+    <script src='http://ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js'></script>
+    <script>
+        var userListData = [];
 
+        $(document).ready(function () {
+
+            populateTable();
+
+        });
+
+        function populateTable() {
+
+            var tableContent = '';
+            var count = 1;
+            
+            $.get('http://localhost:3000/', function (data) {
+                console.log(data);
+                //this will split the string into array line by line
+                var lineByline = data.split('\n');
+                lineByline.length = lineByline.length -1 ;
+                //here we're itraing the array which you've created and printing the values
+                $.each(lineByline, function (key, value) {
+                    tableContent += '<tr>';
+                    tableContent += '<td>' + count++ + '.  ' + value + '</td>';
+                    tableContent += '</tr>';
+                });
+
+                $('#tablediv').html(tableContent);
+            });
+        };
+        var socket = io("http://localhost:3000");
+        socket.on('fileChanged', function (msg) {
+            window.location.reload();
+        });
+    </script>
+</head>
+
+<body>
+    <h2 style="color:brown; margin-left:490px;margin-top:20px;">Display the Text File</h2>
+    <table width="80%" id="tab" style="margin-left:100px;">
+        <thead>
+            <tr>
+                <th>Content</th>
+            </tr>
+            <thead>
+            <tbody id="tablediv">
+            </tbody>
+    </table>
+
+</body>
+
+</html>
